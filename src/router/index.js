@@ -69,6 +69,12 @@ export const constantRoutes = [
         meta: { title: 'Table', icon: 'table' }
       },
       {
+        path: 'box',
+        name: 'Box',
+        component: () => import('@/views/box/index'),
+        meta: { title: 'Box', icon: 'table' }
+      },
+      {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
