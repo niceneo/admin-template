@@ -56,31 +56,78 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
+    path: '/service',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    redirect: '/service/urls',
+    name: 'service',
+    meta: { title: '信息服务', icon: 'information' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
+        path: 'urls',
+        name: 'Urls',
+        component: () => import('@/views/InfoService/ServiceAddress.vue'),
+        meta: { title: '服务地址', icon: 'links-fill' }
       },
       {
-        path: 'box',
-        name: 'Box',
-        component: () => import('@/views/box/index'),
-        meta: { title: 'Box', icon: 'table' }
+        path: 'links',
+        name: 'Links',
+        component: () => import('@/views/InfoService/CommonAddress.vue'),
+        meta: { title: '常用链接', icon: 'links-fill' }
       },
       {
-        path: 'tree',
-        name: 'Tree',
+        path: 'ipports',
+        name: 'Ipports',
+        component: () => import('@/views/InfoService/IpPorts.vue'),
+        meta: { title: '业务IP及端口', icon: 'host' }
+      },
+      {
+        path: 'boxs',
+        name: 'Boxs',
         component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        meta: { title: 'BOX列表', icon: 'box' }
+      },
+      {
+        path: 'others',
+        name: 'Others',
+        component: () => import('@/views/tree/index'),
+        meta: { title: '其他', icon: 'Other' }
       }
     ]
+  },
+
+  {
+    path: '/release',
+    component: Layout,
+    redirect: '/release/boxgrouplists',
+    name: 'release',
+    meta: { title: '版本发布', icon: 'example' },
+    children: [
+      {
+        path: 'boxgrouplists',
+        name: 'Boxgrouplists',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'BOX分组', icon: 'table' }
+      },
+      {
+        path: 'versionlists',
+        name: 'Versionlists',
+        component: () => import('@/views/table/index'),
+        meta: { title: '版本计划', icon: 'table' }
+      },
+      {
+        path: 'htmlorders',
+        name: 'Htmlorders',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'HTML版本', icon: 'table' }
+      },
+      {
+        path: 'boxorders',
+        name: 'Boxorders',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'BOX', icon: 'table' }
+      }
+    ]
+
   },
 
   {
