@@ -83,7 +83,7 @@ export const constantRoutes = [
       {
         path: 'boxs',
         name: 'Boxs',
-        component: () => import('@/views/tree/index'),
+        component: () => import('@/views/InfoService/BoxList.vue'),
         meta: { title: 'BOX列表', icon: 'box' }
       },
       {

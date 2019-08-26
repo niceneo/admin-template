@@ -19,22 +19,22 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="服务名" style="width: 100%" align="center">
+      <el-table-column label="服务名" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="链接地址" style="width: 100%" align="center">
+      <el-table-column label="链接地址" align="center">
         <template slot-scope="scope">
           <a :href="scope.row.link" target="_blank" class="buttonText">{{ scope.row.link }}</a>
         </template>
       </el-table-column>
-      <el-table-column label="备注" style="width: 100%" align="center">
+      <el-table-column label="备注" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.ps }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" style="width: 100%" class-name="small-padding fixed-width">
+      <el-table-column label="Actions" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" icon="el-icon-edit" @click="handleUpdate(row)">
             Edit
@@ -49,7 +49,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="margin-left: 30px;">
         <el-form-item label="服务名" :label-width="formLabelWidth" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>

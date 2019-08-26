@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="keywords" placeholder="暂时不可用" style="width: 200px;" />
+      <el-input v-model="keywords" placeholder="Box名字搜索" style="width: 200px;" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
       </el-button>
@@ -19,37 +19,42 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="服务名" align="center">
+      <el-table-column label="Box名" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.boxname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="开发环境" align="center">
+      <el-table-column label="IP地址" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.dev }}</span>
+          <span>{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="测试环境" align="center">
+      <el-table-column label="dubbo" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.test }}</span>
+          <span>{{ scope.row.dubbo }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="性能环境" align="center">
+      <el-table-column label="jetty" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.uat }}</span>
+          <span>{{ scope.row.jetty }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预发布环境" align="center">
+      <el-table-column label="jmx" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.sit }}</span>
+          <span>{{ scope.row.jmx }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="生产环境" align="center">
+      <el-table-column label="health" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.prd }}</span>
+          <span>{{ scope.row.health }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="desc" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.desc }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Action" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" icon="el-icon-edit" @click="handleUpdate(row)">
             Edit
@@ -65,23 +70,26 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="margin-left: 30px;">
-        <el-form-item label="服务名" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="temp.name" />
+        <el-form-item label="Box名" :label-width="formLabelWidth" prop="boxname">
+          <el-input v-model="temp.boxname" />
         </el-form-item>
-        <el-form-item label="开发环境" :label-width="formLabelWidth">
-          <el-input v-model="temp.dev" />
+        <el-form-item label="IP地址" :label-width="formLabelWidth" prop="ip">
+          <el-input v-model="temp.ip" />
         </el-form-item>
-        <el-form-item label="测试环境" :label-width="formLabelWidth">
-          <el-input v-model="temp.test" />
+        <el-form-item label="dubbo" :label-width="formLabelWidth" prop="dubbo">
+          <el-input v-model="temp.dubbo" />
         </el-form-item>
-        <el-form-item label="性能环境" :label-width="formLabelWidth">
-          <el-input v-model="temp.uat" />
+        <el-form-item label="jetty" :label-width="formLabelWidth" prop="jetty">
+          <el-input v-model="temp.jetty" />
         </el-form-item>
-        <el-form-item label="预发布环境" :label-width="formLabelWidth">
-          <el-input v-model="temp.sit" />
+        <el-form-item label="jmx" :label-width="formLabelWidth" prop="jmx">
+          <el-input v-model="temp.jmx" />
         </el-form-item>
-        <el-form-item label="生产环境" :label-width="formLabelWidth">
-          <el-input v-model="temp.prd" />
+        <el-form-item label="health" :label-width="formLabelWidth" prop="health">
+          <el-input v-model="temp.health" />
+        </el-form-item>
+        <el-form-item label="desc" :label-width="formLabelWidth" prop="desc">
+          <el-input v-model="temp.desc" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -97,42 +105,45 @@
 </template>
 
 <script>
-import { listdata, createdata, updatedata, deletedata } from '@/api/ipports'
+import { listdata, updatedata, createdata, deletedata } from '@/api/InfoService/boxlist'
 import { setTimeout } from 'timers'
 import Pagination from '@/components/Pagination'
 
 export default {
-  name: 'IpPorts',
+  name: 'BoxList',
   components: { Pagination },
   data() {
     return {
-      list: null,
-      tablekey: 0,
       keywords: '',
+      downloadLoading: false,
+      tablekey: 0,
       listLoading: true,
-      rules: {
-        name: [{ required: true, message: '服务名字必须填写', trigger: 'blur' }]
+      list: null,
+      listQuery: {
+        page: 1,
+        limit: 15,
+        sort: 'id'
+      },
+      total: 0,
+      dialogStatus: '',
+      dialogFormVisible: false,
+      textMap: {
+        create: 'Create',
+        update: 'Edit'
       },
       temp: {
         id: undefined
       },
       formLabelWidth: '120px',
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: 'Edit',
-        create: 'Create'
-      },
-      downloadLoading: false,
-      listQuery: {
-        page: 1,
-        limit: 10,
-        sort: 'id'
-      },
-      total: 0
+      rules: {
+        boxname: [{ required: true, message: 'box名字必须填写', trigger: 'blur' }],
+        ip: [{ required: true, message: 'ip地址必须填写', trigger: 'blur' }],
+        dubbo: [{ required: true, message: 'dubbo端口必须填写', trigger: 'blur' }],
+        jetty: [{ required: true, message: 'jetty端口必须填写', trigger: 'blur' }],
+        jmx: [{ required: true, message: 'jmx端口必须填写', trigger: 'blur' }],
+        health: [{ required: true, message: 'health端口必须填写', trigger: 'blur' }]
+      }
     }
-  },
-  watch: {
   },
   created() {
     this.getList()
@@ -143,6 +154,7 @@ export default {
       listdata(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
+        console.log(this.list)
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
@@ -155,8 +167,8 @@ export default {
     },
     handleCreate() {
       this.resetTemp()
-      this.dialogStatus = 'create'
       this.dialogFormVisible = true
+      this.dialogStatus = 'create'
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -165,9 +177,9 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           createdata(this.temp).then((response) => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
             if (response.status == 0) {
+              this.list.unshift(this.temp)
+              this.dialogFormVisible = false
               this.$notify({
                 title: 'Success',
                 message: 'Create Successfully',
@@ -188,17 +200,17 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
-      this.dialogStatue = 'update'
       this.dialogFormVisible = true
+      this.dialogStatus = 'update'
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    updateData() {
+    updateData(row) {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updatedata(tempData).then((response) => {
+          updatedata(tempData).then(response => {
             if (response.status == 0) {
               for (const v of this.list) {
                 if (v.id === this.temp.id) {
@@ -216,7 +228,7 @@ export default {
               })
             } else {
               this.dialogFormVisible = false
-              this.$$notify({
+              this.$notify({
                 title: 'Failed',
                 message: 'Update Failed',
                 type: 'warning',
@@ -231,17 +243,17 @@ export default {
       const id = row.id
       deletedata(id).then(response => {
         if (response.status == 0) {
+          const index = this.list.indexOf(row)
+          this.list.splice(index, 1)
           this.$notify({
             title: 'Success',
             message: 'Delete Successfully',
             type: 'success',
             duration: 2000
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
         } else {
-          this.$$notify({
-            title: 'Success',
+          this.$notify({
+            title: 'Failed',
             message: 'Delete Failed',
             type: 'warning',
             duration: 2000
@@ -249,26 +261,11 @@ export default {
         }
       })
     },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['服务名', '开发环境', '测试环境', '性能环境', '预发布环境', '生产环境']
-        const filterVal = ['name', 'dev', 'test', 'uat', 'sit', 'prd']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'ipports'
-        })
-        this.downloadLoading = false
-      })
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        return v[j]
-      }))
-    }
+    handleDownload() {}
   }
+
 }
 </script>
 
+<style lang="scss" scope>
+</style>
