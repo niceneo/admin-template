@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="keywords" placeholder="Box名字搜索" style="width: 200px;" />
+      <el-input v-model="keywords" placeholder="IP搜索" style="width: 200px;" />
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
       </el-button>
@@ -19,45 +19,57 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column label="Box名" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.boxname }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="IP地址" align="center">
+      <el-table-column label="IP地址" align="center" width="200">
         <template slot-scope="scope">
           <span>{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="dubbo" align="center">
+      <el-table-column label="主机名" align="center" width="200">
         <template slot-scope="scope">
-          <span>{{ scope.row.dubbo }}</span>
+          <span>{{ scope.row.hostname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="jetty" align="center">
+      <el-table-column label="CPU" align="center" width="120">
         <template slot-scope="scope">
-          <span>{{ scope.row.jetty }}</span>
+          <span>{{ scope.row.cpu }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="jmx" align="center">
+      <el-table-column label="内存" align="center" width="120">
         <template slot-scope="scope">
-          <span>{{ scope.row.jmx }}</span>
+          <span>{{ scope.row.memory }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="health" align="center">
+      <el-table-column label="磁盘" align="center" width="200">
         <template slot-scope="scope">
-          <span>{{ scope.row.health }}</span>
+          <span>{{ scope.row.disk }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="desc" align="center">
+      <el-table-column label="系统版本" align="center" width="150">
         <template slot-scope="scope">
-          <span>{{ scope.row.desc }}</span>
+          <span>{{ scope.row.systemversion }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="数据中心" align="center" width="150">
+        <template slot-scope="scope">
+          <span>{{ scope.row.datacenter }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Box" align="center" width="250">
+        <template slot-scope="scope">
+          <span>{{ scope.row.boxname }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="status" align="center" width="100">
+        <template slot-scope="{row}">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="Action" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" icon="el-icon-edit" @click="handleUpdate(row)">
-            Edit
+          <el-button type="primary" size="mini" icon="el-icon-refresh" @click="handleRefresh(row)">
+            Refresh
           </el-button>
           <el-button type="danger" size="mini" icon="el-icon-delete" @click="handleDelete(row)">
             Delete
@@ -70,26 +82,16 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="margin-left: 30px;">
-        <el-form-item label="Box名" :label-width="formLabelWidth" prop="boxname">
-          <el-input v-model="temp.boxname" />
-        </el-form-item>
         <el-form-item label="IP地址" :label-width="formLabelWidth" prop="ip">
           <el-input v-model="temp.ip" />
         </el-form-item>
-        <el-form-item label="dubbo" :label-width="formLabelWidth" prop="dubbo">
-          <el-input v-model="temp.dubbo" />
-        </el-form-item>
-        <el-form-item label="jetty" :label-width="formLabelWidth" prop="jetty">
-          <el-input v-model="temp.jetty" />
-        </el-form-item>
-        <el-form-item label="jmx" :label-width="formLabelWidth" prop="jmx">
-          <el-input v-model="temp.jmx" />
-        </el-form-item>
-        <el-form-item label="health" :label-width="formLabelWidth" prop="health">
-          <el-input v-model="temp.health" />
-        </el-form-item>
-        <el-form-item label="desc" :label-width="formLabelWidth" prop="desc">
-          <el-input v-model="temp.desc" />
+        <el-form-item label="数据中心" :label-width="formLabelWidth" prop="datacenter">
+          <el-radio-group v-model="temp.datacenter">
+            <el-radio label="DMZ" />
+            <el-radio label="APP" />
+            <el-radio label="Mange" />
+            <el-radio label="Local" />
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -105,14 +107,22 @@
 </template>
 
 <script>
-import { listdata, updatedata, createdata, deletedata } from '@/api/InfoService/boxlist'
+import { listdata, updatedata, createdata, deletedata } from '@/api/InfoService/hostsinfo'
 import { setTimeout } from 'timers'
 import Pagination from '@/components/Pagination'
-import { validateIP, isPort } from '@/utils/validate'
 
 export default {
   name: 'BoxList',
   components: { Pagination },
+  filters: {
+    statusFilter(status) {
+      const statusMap = {
+        success: 'success',
+        failed: 'danger'
+      }
+      return statusMap[status]
+    }
+  },
   data() {
     return {
       keywords: '',
@@ -137,12 +147,8 @@ export default {
       },
       formLabelWidth: '120px',
       rules: {
-        boxname: [{ required: true, message: 'box名字必须填写', trigger: 'blur' }],
-        ip: [{ required: true, message: 'ip地址必须填写', trigger: 'blur' }, { validator: validateIP, trigger: 'blur' }],
-        dubbo: [{ required: true, message: 'dubbo端口必须填写', trigger: 'blur' }, { validator: isPort, trigger: 'blur' }],
-        jetty: [{ required: true, message: 'jetty端口必须填写', trigger: 'blur' }, { validator: isPort, trigger: 'blur' }],
-        jmx: [{ required: true, message: 'jmx端口必须填写', trigger: 'blur' }, { validator: isPort, trigger: 'blur' }],
-        health: [{ required: true, message: 'health端口必须填写', trigger: 'blur' }, { validator: isPort, trigger: 'blur' }]
+        ip: [{ required: true, message: 'ip地址必须填写', trigger: 'blur' }],
+        datacenter: [{ required: true, message: '机器所属数据中心必须选择', trigger: 'blur' }]
       }
     }
   },
@@ -199,12 +205,32 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogFormVisible = true
-      this.dialogStatus = 'update'
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+    handleRefresh(row) {
+      const tempData = Object.assign({}, row)
+      updatedata(tempData).then(response => {
+        if (response.status == 0) {
+          console.log(response.data)
+          for (const v of this.list) {
+            if (v.id === tempData.id) {
+              const index = this.list.indexOf(v)
+              this.list.splice(index, 1, response.data)
+              break
+            }
+          }
+          this.$notify({
+            title: 'Success',
+            message: 'Refresh Successfully',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: 'Failed',
+            message: 'Refresh Failed',
+            type: 'warnning',
+            duration: 2000
+          })
+        }
       })
     },
     updateData(row) {
@@ -265,8 +291,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Box名', 'IP地址', 'dubbo', 'Jetty', 'JMX', 'Health', '备注']
-        const filterVal = ['boxname', 'ip', 'dubbo', 'jetty', 'jmx', 'health', 'desc']
+        const tHeader = ['IP地址', '主机名', 'CPU', '内存', '磁盘', '系统版本', '数据中心', 'Box', 'Status']
+        const filterVal = ['ip', 'hostname', 'cpu', 'memory', 'disk', 'systemversion', 'datacenter', 'boxname', 'status']
         const data = this.formatJson(filterVal, this.list)
         excel.export_json_to_excel({
           header: tHeader,

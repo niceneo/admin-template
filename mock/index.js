@@ -8,6 +8,7 @@ import article from './article'
 import commonaddress from './commonaddress'
 import ipports from './ipports'
 import boxlist from './InfoService/boxlist'
+import hostsinfo from './InfoService/hostsinfo'
 
 const mocks = [
   ...user,
@@ -16,7 +17,8 @@ const mocks = [
   ...article,
   ...commonaddress,
   ...ipports,
-  ...boxlist
+  ...boxlist,
+  ...hostsinfo
 ]
 
 // for front mock

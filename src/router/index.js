@@ -75,6 +75,12 @@ export const constantRoutes = [
         meta: { title: '常用链接', icon: 'links-fill' }
       },
       {
+        path: 'hosts',
+        name: 'Hosts',
+        component: () => import('@/views/InfoService/HostsInfo.vue'),
+        meta: { title: '主机详情', icon: 'host_hardware' }
+      },
+      {
         path: 'ipports',
         name: 'Ipports',
         component: () => import('@/views/InfoService/IpPorts.vue'),
