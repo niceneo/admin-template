@@ -123,8 +123,15 @@ export const constantRoutes = [
       {
         path: 'htmlorders',
         name: 'Htmlorders',
-        component: () => import('@/views/table/index'),
+        component: () => import('@/views/ReleaseInfo/HtmlList.vue'),
         meta: { title: 'HTML版本', icon: 'table' }
+      },
+      {
+        path: 'htmlorders/:id(\\d+)',
+        name: 'Htmlordersdeploy',
+        component: () => import('@/views/ReleaseInfo/HtmlDeploy.vue'),
+        meta: { title: 'HTML发版', noCache: true, activeMenu: '/release/htmlorders' },
+        hidden: true
       },
       {
         path: 'boxorders',

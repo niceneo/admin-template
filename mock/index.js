@@ -9,6 +9,7 @@ import commonaddress from './commonaddress'
 import ipports from './ipports'
 import boxlist from './InfoService/boxlist'
 import hostsinfo from './InfoService/hostsinfo'
+import htmllist from './ReleseInfo/htmllist'
 
 const mocks = [
   ...user,
@@ -18,7 +19,8 @@ const mocks = [
   ...commonaddress,
   ...ipports,
   ...boxlist,
-  ...hostsinfo
+  ...hostsinfo,
+  ...htmllist
 ]
 
 // for front mock
