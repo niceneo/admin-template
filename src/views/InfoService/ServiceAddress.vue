@@ -26,7 +26,7 @@
     >
       <el-table-column label="服务名" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.servicename }}</span>
+          <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="开发环境" align="center">
@@ -71,7 +71,7 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="30%">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="margin-left:30px;">
         <el-form-item label="服务名" :label-width="formLabelWidth" prop="servicename">
-          <el-input v-model="temp.servicename" />
+          <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="开发环境" :label-width="formLabelWidth">
           <el-input v-model="temp.dev" />
@@ -201,8 +201,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+        this.list = response.data
+        this.total = response.data.length
 
         // Just to simulate the time of the request
         setTimeout(() => {

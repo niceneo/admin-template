@@ -33,6 +33,7 @@ for (let i = 0; i < count; i++) {
 
 export default [
   {
+    // url: '/service/urls/get',
     url: '/article/list',
     type: 'get',
     response: config => {

@@ -2,9 +2,10 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/article/list',
-    method: 'get',
-    params: query
+    url: '/service/urls/get',
+    // url: '/article/list',
+    method: 'get'
+    // params: query
   })
 }
 
