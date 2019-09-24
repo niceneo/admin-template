@@ -20,7 +20,8 @@ for (let i = 0; i < count; i++) {
 
 export default [
   {
-    url: '/release/htmlorders/get',
+    // url: '/release/htmlorders/get',
+    url: '/abc',
     type: 'get',
     response: config => {
       const { page = 1, limit = 20, sort } = config.query

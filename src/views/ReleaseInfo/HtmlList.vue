@@ -34,11 +34,6 @@
           <span>{{ IsFull[scope.row.is_full] }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="关联版本" align="center" width="300">
-        <template slot-scope="scope">
-          <span>{{ scope.row.related }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="申请人" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.user }}</span>
@@ -46,7 +41,7 @@
       </el-table-column>
       <el-table-column label="申请时间" align="center" width="180">
         <template slot-scope="scope">
-          <span>{{ scope.row.created_at }}</span>
+          <span>{{ scope.row.created_at | parseTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="处理人" align="center" width="150">
@@ -56,12 +51,17 @@
       </el-table-column>
       <el-table-column label="处理时间" align="center" width="180">
         <template slot-scope="scope">
-          <span>{{ scope.row.operated_at }}</span>
+          <span>{{ scope.row.operated_at | parseTime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Status" align="center" width="120">
         <template slot-scope="scope">
           <span>{{ scope.row.status }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联版本" align="center" width="150">
+        <template slot-scope="scope">
+          <span>{{ scope.row.related }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Action" align="center" class-name="small-padding fixed-width">
@@ -78,18 +78,83 @@
 
     <Pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
+    <el-dialog :title="Add" :visible.sync="dialogFormVisible" width="30%">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left">
+        <el-form-item label="标题" :label-width="formLabelWidth" prop="ps">
+          <el-input v-model="temp.ps" />
+        </el-form-item>
+        <el-form-item label="项目" :label-width="formLabelWidth" prop="types">
+          <!-- <el-input v-model="temp.types" /> -->
+          <el-select ref="select" v-model="provalue" placeholder="请选择">
+            <el-option v-for="item in prooptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="类型" :label-width="formLabelWidth" prop="is_full">
+          <el-select ref="select" v-model="typevalue" placeholder="请选择">
+            <el-option v-for="item in typeoptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="文件" :label-width="formLabelWidth" prop="uploadfile">
+          <el-upload
+            class="upload-demo"
+            drag
+            action="https://jsonplaceholder.typicode.com/posts/"
+            multiple
+          >
+            <i class="el-icon-upload" />
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div slot="tip" class="el-upload__tip">只能上传zip格式得压缩文件</div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="关联" :label-width="formLabelWidth" prop="is_full">
+          <el-select ref="select" v-model="value" placeholder="请选择关联版本">
+            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false ">
+          Cancel
+        </el-button>
+        <el-button type="primary" @click="createData()">
+          Confirm
+        </el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { htmllist } from '@/api/Deploy/htmllist'
+import { htmllist, GetProjectTypes } from '@/api/Deploy/htmllist'
 import Pagination from '@/components/Pagination'
+import { parseTime } from '@/utils'
 
 export default {
   name: 'HtmlList',
   components: { Pagination },
+  filters: {
+    parseTime
+  },
   data() {
     return {
+      Add: 'Add',
+      dialogFormVisible: false,
+      rules: {},
+      temp: {
+        id: undefined
+      },
+      provalue: '',
+      typevalue: '',
+      value: '',
+      options: [],
+      prooptions: [
+        { value: '选项1', label: '黄金糕' }
+      ],
+      typeoptions: [
+        { value: '选项1', label: '黄金糕' }
+      ],
+      formLabelWidth: '80px',
       keywords: '',
       tablekey: 0,
       list: null,
@@ -109,22 +174,36 @@ export default {
   },
   created() {
     this.getList()
+    this.getaddprojectdata()
   },
   methods: {
     getList() {
       this.listLoading = true
       htmllist(this.listQuery).then(response => {
         if (response.status == 0) {
-          this.list = response.data.items
-          this.total = response.data.total
+          this.list = response.data
+          this.total = response.data.length
+          console.log(response.data)
           setTimeout(() => {
             this.listLoading = false
           }, 1.5 * 1000)
         }
       })
     },
-    handleCreate() {
+    getaddprojectdata() {
+      GetProjectTypes().then(response => {
+        if (response.status == 0) {
+          console.log(response.data)
+        }
+      })
     },
+    handleCreate() {
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    createData() {},
     handleDownload() {
     },
     handleUpdate(row) {
